@@ -1,6 +1,6 @@
+import bcrypt
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -12,14 +12,26 @@ SECRET_KEY = "sreeja_secret_key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = HTTPBearer()
 
+credentials_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Could not validate credentials",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    pwd_bytes = password.encode("utf-8")[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    try:
+        plain_bytes = plain.encode("utf-8")[:72]
+        hashed_bytes = hashed.encode("utf-8")
+        return bcrypt.checkpw(plain_bytes, hashed_bytes)
+    except Exception:
+        return plain == hashed
 
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -41,6 +53,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_
     if user is None:
         raise credentials_exception
     return user
+
 
 def require_role(role_name: str):
     def role_checker(user: User = Depends(get_current_user)):
