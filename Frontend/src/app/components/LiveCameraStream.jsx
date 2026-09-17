@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
+
 const TOKENS = {
   bg: "#0B0F17",
   surface: "#131A27",
@@ -112,7 +114,7 @@ export default function LiveCameraStream({ onShopperUpdate }) {
 
     try {
       setProcessingProgress(45);
-      const res = await fetch("http://127.0.0.1:8000/api/video/analyze-video-full", {
+      const res = await fetch(`${API_BASE_URL}/api/video/analyze-video-full`, {
         method: "POST",
         body: formData,
       });

@@ -10,6 +10,8 @@ import ShelfPlanogramAuditor from "../../components/ShelfPlanogramAuditor";
 import CommonPathwaysStudio from "../../components/CommonPathwaysStudio";
 import AttentionHeatmapsStudio from "../../components/AttentionHeatmapsStudio";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
+
 // ==========================================
 // DESIGN TOKENS & STYLES
 // ==========================================
@@ -145,7 +147,7 @@ export default function AdminDashboard() {
 
     // Fetch Stores from DB
     axios
-      .get("http://localhost:8000/stores", { headers: authHeaders })
+      .get(`${API_BASE_URL}/stores`, { headers: authHeaders })
       .then((res) => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           setStores(res.data.map(s => ({
@@ -160,7 +162,7 @@ export default function AdminDashboard() {
 
     // Fetch Cameras from DB
     axios
-      .get("http://localhost:8000/cameras", { headers: authHeaders })
+      .get(`${API_BASE_URL}/cameras`, { headers: authHeaders })
       .then((res) => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           setCameras(res.data);
@@ -170,7 +172,7 @@ export default function AdminDashboard() {
 
     // Fetch Users from DB
     axios
-      .get("http://localhost:8000/users", { headers: authHeaders })
+      .get(`${API_BASE_URL}/users`, { headers: authHeaders })
       .then((res) => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           setUsers(res.data);
@@ -249,7 +251,7 @@ export default function AdminDashboard() {
     if (editingStore) {
       setStores(prev => prev.map(s => s.id === editingStore.id ? { ...s, name: storeForm.name, location: storeForm.location } : s));
       try {
-        await axios.put(`http://localhost:8000/stores/${editingStore.id}`, {
+        await axios.put(`${API_BASE_URL}/stores/${editingStore.id}`, {
           name: storeForm.name,
           location: storeForm.location,
         }, { headers: authHeaders });
@@ -262,7 +264,7 @@ export default function AdminDashboard() {
       const newStore = { id: tempId, name: storeForm.name, location: storeForm.location || "Hyderabad", camerasCount: 0 };
       setStores(prev => [...prev, newStore]);
       try {
-        const res = await axios.post("http://localhost:8000/stores", {
+        const res = await axios.post(`${API_BASE_URL}/stores`, {
           name: storeForm.name,
           location: storeForm.location || "Hyderabad",
         }, { headers: authHeaders });
@@ -282,7 +284,7 @@ export default function AdminDashboard() {
       setStores(prev => prev.filter(s => s.id !== storeId));
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       try {
-        await axios.delete(`http://localhost:8000/stores/${storeId}`, {
+        await axios.delete(`${API_BASE_URL}/stores/${storeId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
       } catch (err) {
@@ -316,7 +318,7 @@ export default function AdminDashboard() {
     if (editingCam) {
       setCameras(prev => prev.map(c => c.id === editingCam.id ? { ...camForm } : c));
       try {
-        await axios.put(`http://localhost:8000/cameras/${editingCam.id}`, {
+        await axios.put(`${API_BASE_URL}/cameras/${editingCam.id}`, {
           name: camForm.name,
           store: camForm.store,
           zone: camForm.zone,
@@ -332,7 +334,7 @@ export default function AdminDashboard() {
       const tempCam = { ...camForm, fps: 30 };
       setCameras(prev => [...prev, tempCam]);
       try {
-        const res = await axios.post("http://localhost:8000/cameras", {
+        const res = await axios.post(`${API_BASE_URL}/cameras`, {
           camera_code: camForm.id,
           name: camForm.name,
           store: camForm.store,
@@ -358,7 +360,7 @@ export default function AdminDashboard() {
       setCameras(prev => prev.filter(c => c.id !== camId));
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       try {
-        await axios.delete(`http://localhost:8000/cameras/${camId}`, {
+        await axios.delete(`${API_BASE_URL}/cameras/${camId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
       } catch (err) {
@@ -392,7 +394,7 @@ export default function AdminDashboard() {
     if (editingUser) {
       setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...userForm } : u));
       try {
-        await axios.put(`http://localhost:8000/users/${editingUser.id}`, {
+        await axios.put(`${API_BASE_URL}/users/${editingUser.id}`, {
           name: userForm.name,
           email: userForm.email,
           role: userForm.role,
@@ -408,7 +410,7 @@ export default function AdminDashboard() {
       const newUser = { id: tempId, uid: `USR-${users.length + 1}`, ...userForm };
       setUsers(prev => [...prev, newUser]);
       try {
-        const res = await axios.post("http://localhost:8000/users", {
+        const res = await axios.post(`${API_BASE_URL}/users`, {
           name: userForm.name,
           email: userForm.email,
           role: userForm.role,
@@ -431,7 +433,7 @@ export default function AdminDashboard() {
       setUsers(prev => prev.filter(u => u.id !== userId));
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       try {
-        await axios.delete(`http://localhost:8000/users/${userId}`, {
+        await axios.delete(`${API_BASE_URL}/users/${userId}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
       } catch (err) {

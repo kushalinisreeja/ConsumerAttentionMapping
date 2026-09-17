@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
+
 // ==========================================
 // DESIGN TOKENS — pulled directly from Login.jsx so the dashboard reads as
 // the same product: navy/charcoal surfaces, amber accent, Space Grotesk for
@@ -239,7 +241,7 @@ export default function StoreManagerDashboard() {
     } catch (e) {}
 
     axios
-      .get("http://localhost:8000/stores", { headers: { Authorization: `Bearer ${token}` } })
+      .get(`${API_BASE_URL}/stores`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           setStores(res.data);
@@ -269,7 +271,7 @@ export default function StoreManagerDashboard() {
   useEffect(() => {
     // Fetch live restock tasks from database
     axios
-      .get("http://localhost:8000/restock-tasks")
+      .get(`${API_BASE_URL}/restock-tasks`)
       .then((res) => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           setRestockTasks(res.data);
@@ -308,7 +310,7 @@ export default function StoreManagerDashboard() {
     setRestockTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, status: t.status === "Pending" ? "In Progress" : "Done" } : t))
     );
-    axios.patch(`http://localhost:8000/restock-tasks/${taskId}`, { status: "In Progress" }).catch(() => {});
+    axios.patch(`${API_BASE_URL}/restock-tasks/${taskId}`, { status: "In Progress" }).catch(() => {});
     setToast("Restock task assigned to floor team.");
   };
 

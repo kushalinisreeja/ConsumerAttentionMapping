@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
+
 export default function Dashboard() {
   const [stores, setStores] = useState([]);
   const [error, setError] = useState("");
@@ -16,7 +18,7 @@ export default function Dashboard() {
     }
 
     axios
-      .get("http://localhost:8000/stores", {
+      .get(`${API_BASE_URL}/stores`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setStores(res.data))

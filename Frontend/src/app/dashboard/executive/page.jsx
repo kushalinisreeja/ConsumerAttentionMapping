@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
+
 const TOKENS = {
   bg: "#0B0F17",
   sidebarBg: "#131A27",
@@ -96,7 +98,7 @@ export default function ExecutiveDashboard() {
     } catch (e) {}
 
     axios
-      .get("http://localhost:8000/stores", {
+      .get(`${API_BASE_URL}/stores`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {

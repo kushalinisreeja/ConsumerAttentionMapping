@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
+
 // ==========================================
 // DESIGN TOKENS — matches the Login page palette
 // (dark navy background, warm gold accent)
@@ -359,7 +361,7 @@ export default function RetailAnalystDashboard() {
     } catch (e) {}
 
     axios
-      .get("http://localhost:8000/stores", {
+      .get(`${API_BASE_URL}/stores`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {

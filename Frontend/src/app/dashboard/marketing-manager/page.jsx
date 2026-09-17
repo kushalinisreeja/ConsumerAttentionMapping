@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
+
 // ==========================================
 // DESIGN TOKENS — matched to Login.jsx
 // ==========================================
@@ -197,7 +199,7 @@ export default function MarketingManagerDashboard() {
       if (saved && saved.trim()) setUserName(saved.trim());
     } catch (e) {}
 
-    fetch("http://localhost:8000/campaigns")
+    fetch(`${API_BASE_URL}/campaigns`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -206,7 +208,7 @@ export default function MarketingManagerDashboard() {
       })
       .catch(() => {});
 
-    fetch("http://localhost:8000/stores")
+    fetch(`${API_BASE_URL}/stores`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -242,7 +244,7 @@ export default function MarketingManagerDashboard() {
     setCampaigns((prev) => [entry, ...prev]);
     
     // Save to Database
-    fetch("http://localhost:8000/campaigns", {
+    fetch(`${API_BASE_URL}/campaigns`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -280,7 +282,7 @@ export default function MarketingManagerDashboard() {
     setCampaigns((prev) => [entry, ...prev]);
 
     // Save to Database
-    fetch("http://localhost:8000/campaigns", {
+    fetch(`${API_BASE_URL}/campaigns`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -317,6 +319,8 @@ export default function MarketingManagerDashboard() {
     <div style={{ height: "100vh", width: "100vw", overflow: "hidden", background: TOKENS.bg, color: TOKENS.text, fontFamily: fontBody, display: "flex" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: ${TOKENS.border}; border-radius: 8px; }
       `}</style>

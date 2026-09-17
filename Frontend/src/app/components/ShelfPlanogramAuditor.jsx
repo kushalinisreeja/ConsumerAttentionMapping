@@ -1,5 +1,7 @@
-﻿"use client";
+"use client";
 import React, { useState, useRef } from "react";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
 
 const TOKENS = {
   bg: "#0B0F17",
@@ -21,7 +23,7 @@ const cardStyle = {
   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
 };
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = `${API_BASE_URL}`;
 
 export default function ShelfPlanogramAuditor() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -76,7 +78,7 @@ export default function ShelfPlanogramAuditor() {
       <div style={{ ...cardStyle, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>
-            🛒 AI Shelf Planogram & Stock Analyzer (SKU-110K)
+            ?? AI Shelf Planogram & Stock Analyzer (SKU-110K)
           </h2>
           <p style={{ margin: "4px 0 0", fontSize: "12px", color: TOKENS.muted }}>
             Upload store shelf photos to automatically detect product facings, Out-of-Stock (OOS) void gaps, shelf tiers, and share-of-shelf.
@@ -84,7 +86,7 @@ export default function ShelfPlanogramAuditor() {
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           <span style={{ fontSize: "11px", padding: "6px 12px", borderRadius: "20px", background: "rgba(95,174,134,0.15)", color: TOKENS.success, fontWeight: 700 }}>
-            ● YOLOv8 + Spatial SKU Grid Active
+            ? YOLOv8 + Spatial SKU Grid Active
           </span>
         </div>
       </div>
@@ -116,7 +118,7 @@ export default function ShelfPlanogramAuditor() {
               gap: "8px",
             }}
           >
-            📁 Select Shelf Image
+            ?? Select Shelf Image
           </button>
 
           <span style={{ fontSize: "12px", color: TOKENS.muted }}>
@@ -139,13 +141,13 @@ export default function ShelfPlanogramAuditor() {
               transition: "all 0.2s",
             }}
           >
-            {isProcessing ? "⏳ Running AI Detection..." : "🚀 Run AI Shelf Audit"}
+            {isProcessing ? "? Running AI Detection..." : "?? Run AI Shelf Audit"}
           </button>
         </div>
 
         {errorMsg && (
           <div style={{ marginTop: "14px", padding: "10px 14px", borderRadius: "8px", background: "rgba(232,101,79,0.2)", border: `1px solid ${TOKENS.danger}`, color: TOKENS.danger, fontSize: "12px" }}>
-            ⚠️ {errorMsg}
+            ?? {errorMsg}
           </div>
         )}
       </div>
@@ -168,7 +170,7 @@ export default function ShelfPlanogramAuditor() {
                 {auditResult.out_of_stock_gaps_count} Gaps
               </div>
               <div style={{ fontSize: "11px", color: auditResult.out_of_stock_gaps_count > 0 ? TOKENS.danger : TOKENS.success, marginTop: "2px" }}>
-                {auditResult.out_of_stock_gaps_count > 0 ? "⚠️ Immediate Restock Required" : "● Fully Stocked Shelf"}
+                {auditResult.out_of_stock_gaps_count > 0 ? "?? Immediate Restock Required" : "? Fully Stocked Shelf"}
               </div>
             </div>
 
@@ -195,11 +197,11 @@ export default function ShelfPlanogramAuditor() {
             {/* ANNOTATED SHELF IMAGE */}
             <div style={cardStyle}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700 }}>📸 AI Annotated Shelf Overlay</h3>
+                <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700 }}>?? AI Annotated Shelf Overlay</h3>
                 <div style={{ display: "flex", gap: "6px", fontSize: "10px" }}>
-                  <span style={{ padding: "2px 8px", borderRadius: "10px", background: "rgba(95,174,134,0.2)", color: TOKENS.success, border: `1px solid ${TOKENS.success}` }}>● Golden Zone</span>
-                  <span style={{ padding: "2px 8px", borderRadius: "10px", background: "rgba(91,141,239,0.2)", color: TOKENS.info, border: `1px solid ${TOKENS.info}` }}>● Reach Tier</span>
-                  <span style={{ padding: "2px 8px", borderRadius: "10px", background: "rgba(232,101,79,0.2)", color: TOKENS.danger, border: `1px solid ${TOKENS.danger}` }}>● Out-of-Stock</span>
+                  <span style={{ padding: "2px 8px", borderRadius: "10px", background: "rgba(95,174,134,0.2)", color: TOKENS.success, border: `1px solid ${TOKENS.success}` }}>? Golden Zone</span>
+                  <span style={{ padding: "2px 8px", borderRadius: "10px", background: "rgba(91,141,239,0.2)", color: TOKENS.info, border: `1px solid ${TOKENS.info}` }}>? Reach Tier</span>
+                  <span style={{ padding: "2px 8px", borderRadius: "10px", background: "rgba(232,101,79,0.2)", color: TOKENS.danger, border: `1px solid ${TOKENS.danger}` }}>? Out-of-Stock</span>
                 </div>
               </div>
 
@@ -217,7 +219,7 @@ export default function ShelfPlanogramAuditor() {
               
               {/* SHARE OF SHELF CARD */}
               <div style={cardStyle}>
-                <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: 700 }}>📊 Share of Shelf Distribution</h3>
+                <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: 700 }}>?? Share of Shelf Distribution</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                   {auditResult.share_of_shelf.map((item, idx) => (
                     <div key={idx}>
@@ -235,7 +237,7 @@ export default function ShelfPlanogramAuditor() {
 
               {/* AI MERCHANDISING RECOMMENDATIONS */}
               <div style={cardStyle}>
-                <h3 style={{ margin: "0 0 10px 0", fontSize: "15px", fontWeight: 700 }}>💡 AI Planogram Suggestions</h3>
+                <h3 style={{ margin: "0 0 10px 0", fontSize: "15px", fontWeight: 700 }}>?? AI Planogram Suggestions</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   {auditResult.ai_merchandising_recommendations.map((rec, idx) => (
                     <div key={idx} style={{ padding: "10px", background: TOKENS.bg, borderRadius: "8px", borderLeft: `3px solid ${idx === 0 && auditResult.out_of_stock_gaps_count > 0 ? TOKENS.danger : TOKENS.success}`, fontSize: "12px", color: TOKENS.muted }}>
@@ -251,7 +253,7 @@ export default function ShelfPlanogramAuditor() {
 
           {/* DETECTED ITEMS TABLE */}
           <div style={cardStyle}>
-            <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: 700 }}>📋 Detected SKU Inventory Manifest</h3>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: 700 }}>?? Detected SKU Inventory Manifest</h3>
             <div style={{ maxHeight: "240px", overflowY: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", textAlign: "left" }}>
                 <thead>
@@ -272,7 +274,7 @@ export default function ShelfPlanogramAuditor() {
                         {item.shelf_tier}
                       </td>
                       <td style={{ padding: "8px" }}>{item.confidence}%</td>
-                      <td style={{ padding: "8px", color: TOKENS.success }}>● Stocked</td>
+                      <td style={{ padding: "8px", color: TOKENS.success }}>? Stocked</td>
                     </tr>
                   ))}
                 </tbody>

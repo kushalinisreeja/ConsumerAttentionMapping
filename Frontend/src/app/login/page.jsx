@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
+
 const TOKENS = {
   bg: "#0B0F17",
   surface: "#131A27",
@@ -117,7 +119,7 @@ export default function Login() {
     try {
       if (mode === "register") {
         // CREATE ACCOUNT
-        const res = await axios.post("http://localhost:8000/register", {
+        const res = await axios.post(`${API_BASE_URL}/register`, {
           name: name.trim() || "Retail User",
           email: email.trim(),
           password,
@@ -151,7 +153,7 @@ export default function Login() {
         }, 800);
       } else {
         // SIGN IN
-        const response = await axios.post("http://localhost:8000/login", { email, password });
+        const response = await axios.post(`${API_BASE_URL}/login`, { email, password });
         const token = response.data.access_token;
         localStorage.setItem("token", token);
         if (response.data.name) {
@@ -207,6 +209,8 @@ export default function Login() {
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
 
         @keyframes pulseDot {
           0%, 100% { opacity: 0.12; transform: scale(1); }
