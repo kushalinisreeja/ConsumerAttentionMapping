@@ -139,6 +139,12 @@ def analyze_shelf_image(image_bytes: bytes, filename: str = "shelf.jpg") -> Dict
         raise ValueError("Could not decode shelf image.")
 
     h, w, _ = img.shape
+    max_dim = 640
+    if max(h, w) > max_dim:
+        scale = max_dim / float(max(h, w))
+        img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+        h, w, _ = img.shape
+
     shelf_dividers = detect_shelf_rows(img)
     
     top_tier_y = shelf_dividers[0]
@@ -146,37 +152,36 @@ def analyze_shelf_image(image_bytes: bytes, filename: str = "shelf.jpg") -> Dict
 
     candidate_boxes: List[Dict[str, Any]] = []
 
-    # 1. Primary AI Detection Pass (YOLO with low confidence threshold for retail products)
+    # 1. Primary AI Detection Pass (YOLO with low memory footprint)
     model = get_product_model()
     if model:
-        results = model(img, conf=0.08, verbose=False)
+        try:
+            import torch
+            with torch.no_grad():
+                results = model(img, imgsz=640, conf=0.12, verbose=False)
+                if results and len(results) > 0 and results[0].boxes is not None:
+                    boxes = results[0].boxes
+                    for box in boxes:
+                        cls_id = int(box.cls[0].item())
+                        conf = float(box.conf[0].item())
+                        cls_name = results[0].names.get(cls_id, "product")
+                        if cls_name == "person":
+                            continue
+                        x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
+                        bw, bh = x2 - x1, y2 - y1
+                        if bw < 15 or bh < 20 or bw > w * 0.7 or bh > h * 0.8:
+                            continue
+                        category = RETAIL_CATEGORY_MAP.get(cls_name, "Packaged Goods")
+                        candidate_boxes.append({
+                            "bbox": [x1, y1, x2, y2],
+                            "conf": conf,
+                            "category": category,
+                            "detected_class": cls_name,
+                            "source": "yolo"
+                        })
+        except Exception as yolo_err:
+            print(f"YOLO pass skipped or fallback used: {yolo_err}")
 
-        boxes = results[0].boxes
-        
-        for box in boxes:
-            cls_id = int(box.cls[0].item())
-            conf = float(box.conf[0].item())
-            cls_name = results[0].names.get(cls_id, "product")
-            
-            # Filter out person detection
-            if cls_name == "person":
-                continue
-                
-            x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
-            bw, bh = x2 - x1, y2 - y1
-            
-            # Discard unreasonable aspect ratios
-            if bw < 20 or bh < 25 or bw > w * 0.6 or bh > h * 0.7:
-                continue
-                
-            category = RETAIL_CATEGORY_MAP.get(cls_name, "Packaged Goods")
-            candidate_boxes.append({
-                "bbox": [x1, y1, x2, y2],
-                "conf": conf,
-                "category": category,
-                "detected_class": cls_name,
-                "source": "yolo"
-            })
 
     # 2. Secondary Dense Retail Facing Pass (Contour & Vertical Gradient Slicing)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -362,7 +367,11 @@ def analyze_shelf_image(image_bytes: bytes, filename: str = "shelf.jpg") -> Dict
     # Planogram scoring formula penalizes OOS gaps and rewards Golden Zone completeness
     planogram_score = round(max(35.0, min(99.0, 100.0 - (len(oos_gaps) * 12.0) + (golden_share * 0.15))), 1)
 
+    import gc
+    gc.collect()
+
     return {
+
         "filename": filename,
         "total_facings_detected": total_facings,
         "out_of_stock_gaps_count": len(oos_gaps),
