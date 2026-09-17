@@ -20,9 +20,16 @@ from ..services.tracking_engine import transform_to_floorplan, zone_for_point
 
 router = APIRouter(prefix="/api/video", tags=["Video Analysis"])
 
-# Person tracking model
-person_model = YOLO("yolov8n.pt")
+_person_model = None
+
+def get_person_model():
+    global _person_model
+    if _person_model is None:
+        _person_model = YOLO("yolov8n.pt")
+    return _person_model
+
 GENERATED_REPORTS = {}  # {analysis_id: file_path}
+
 
 @router.post("/analyze-video-full")
 async def analyze_uploaded_video(
@@ -85,7 +92,8 @@ async def analyze_uploaded_video(
             time_str = f"{int(timestamp_sec // 60):02d}:{int(timestamp_sec % 60):02d}.{int((timestamp_sec % 1) * 10)}"
 
             # Run person detection & tracking
-            results = person_model.track(
+            model = get_person_model()
+            results = model.track(
                 frame,
                 tracker="bytetrack.yaml",
                 persist=True,
@@ -93,6 +101,7 @@ async def analyze_uploaded_video(
                 conf=0.25,
                 verbose=False
             )
+
 
             # Run Gaze & Pose Detection for rich head pose
             gaze_people = analyze_frame_gaze(frame, conf=0.25)

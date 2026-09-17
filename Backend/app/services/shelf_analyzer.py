@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/services/shelf_analyzer.py
 Industrial-Grade Retail Shelf & Planogram AI Analyzer (SKU-110K & Dense Facing Detection)
 High-Accuracy Product Localization, Multi-Row Out-of-Stock (OOS) Gap Detection & Planogram Audit
@@ -9,11 +9,17 @@ import base64
 from typing import Dict, Any, List
 from ultralytics import YOLO
 
-# Load YOLO model
-try:
-    product_model = YOLO("yolov8n.pt")
-except Exception:
-    product_model = None
+_product_model = None
+
+def get_product_model():
+    global _product_model
+    if _product_model is None:
+        try:
+            _product_model = YOLO("yolov8n.pt")
+        except Exception:
+            _product_model = None
+    return _product_model
+
 
 RETAIL_CATEGORY_MAP = {
     "bottle": "Beverages & Drinks",
@@ -141,8 +147,10 @@ def analyze_shelf_image(image_bytes: bytes, filename: str = "shelf.jpg") -> Dict
     candidate_boxes: List[Dict[str, Any]] = []
 
     # 1. Primary AI Detection Pass (YOLO with low confidence threshold for retail products)
-    if product_model:
-        results = product_model(img, conf=0.08, verbose=False)
+    model = get_product_model()
+    if model:
+        results = model(img, conf=0.08, verbose=False)
+
         boxes = results[0].boxes
         
         for box in boxes:

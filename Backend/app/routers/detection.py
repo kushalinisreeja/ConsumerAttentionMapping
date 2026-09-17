@@ -8,8 +8,13 @@ import base64
 
 router = APIRouter()
 
-# Load your custom fine-tuned RPC model
-rpc_model = YOLO("best.pt")
+_rpc_model = None
+
+def get_rpc_model():
+    global _rpc_model
+    if _rpc_model is None:
+        _rpc_model = YOLO("best.pt")
+    return _rpc_model
 
 @router.post("/detect-shelf-products")
 async def detect_shelf_products(file: UploadFile = File(...)):
@@ -24,8 +29,10 @@ async def detect_shelf_products(file: UploadFile = File(...)):
     if image is None:
         raise HTTPException(status_code=400, detail="Invalid image format")
 
-    # Run inference using your RPC model
-    results = rpc_model.predict(source=image, conf=0.25, verbose=False)
+    # Run inference using lazy-loaded RPC model
+    model = get_rpc_model()
+    results = model.predict(source=image, conf=0.25, verbose=False)
+
     
     detection_list = []
     item_counts = {}

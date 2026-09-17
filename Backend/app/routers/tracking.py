@@ -11,10 +11,11 @@ from ultralytics import YOLO
 
 from ..services.tracking_engine import transform_to_floorplan, zone_for_point, STORE_ZONES
 from ..services.gaze_engine import estimate_head_pose, classify_gaze_target
+from .video_analysis import get_person_model
 
 router = APIRouter()
-person_model = YOLO("yolov8n.pt")
 SAMPLE_EVERY_N_FRAMES = 3
+
 
 @router.post("/track-video")
 async def track_video(file: UploadFile = File(...), store: str = Form(...)):
@@ -54,7 +55,8 @@ async def track_video(file: UploadFile = File(...), store: str = Form(...)):
             if frame_idx % SAMPLE_EVERY_N_FRAMES != 0:
                 continue
 
-            results = person_model.track(
+            model = get_person_model()
+            results = model.track(
                 frame,
                 tracker="bytetrack.yaml",
                 persist=True,
@@ -62,6 +64,7 @@ async def track_video(file: UploadFile = File(...), store: str = Form(...)):
                 conf=0.25,
                 verbose=False,
             )
+
             analyzed_frames += 1
 
             if results[0].boxes is not None and results[0].boxes.id is not None:

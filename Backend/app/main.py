@@ -2,8 +2,20 @@
 backend/app/main.py
 FastAPI Main Application Entrypoint
 """
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+
+try:
+    import torch
+    torch.set_num_threads(1)
+except Exception:
+    pass
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+
 
 from .routers import auth, stores, detection, tracking, streams, analytics, video_analysis, behavior, shelf, products, campaigns, restock_tasks
 from .auth import require_role

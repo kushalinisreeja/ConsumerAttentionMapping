@@ -7,8 +7,14 @@ import numpy as np
 import cv2
 from ultralytics import YOLO
 
-# Load pose model (downloads automatically if not present)
-pose_model = YOLO("yolov8n-pose.pt")
+_pose_model = None
+
+def get_pose_model():
+    global _pose_model
+    if _pose_model is None:
+        _pose_model = YOLO("yolov8n-pose.pt")
+    return _pose_model
+
 
 SHELF_LEVELS = [
     {"name": "Top Shelf", "min_pitch": 12.0, "max_pitch": 45.0, "color": (255, 165, 0)},
@@ -90,7 +96,9 @@ def detect_product_reach(keypoints, person_bbox):
 
 def analyze_frame_gaze(frame, conf=0.3):
     """Runs pose detection and extracts gaze analytics for all individuals in a frame."""
-    results = pose_model.predict(frame, conf=conf, verbose=False)
+    model = get_pose_model()
+    results = model.predict(frame, conf=conf, verbose=False)
+
     people_gaze = []
 
     if results and len(results) > 0 and results[0].keypoints is not None:
