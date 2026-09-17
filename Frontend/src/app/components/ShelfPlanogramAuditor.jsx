@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://cosumer-attention-mapping.onrender.com";
 
@@ -24,6 +24,7 @@ const cardStyle = {
   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
 };
 
+const STORAGE_KEY = "shelf_audit_last_result";
 const API_BASE = `${API_BASE_URL}`;
 
 export default function ShelfPlanogramAuditor() {
@@ -32,7 +33,22 @@ export default function ShelfPlanogramAuditor() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [auditResult, setAuditResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [lastScanTime, setLastScanTime] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Restore last audit result from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.result) {
+          setAuditResult(parsed.result);
+          setLastScanTime(parsed.timestamp || null);
+        }
+      }
+    } catch (e) {}
+  }, []);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -41,7 +57,16 @@ export default function ShelfPlanogramAuditor() {
       setPreviewUrl(URL.createObjectURL(file));
       setAuditResult(null);
       setErrorMsg(null);
+      setLastScanTime(null);
     }
+  };
+
+  const handleClearResult = () => {
+    setAuditResult(null);
+    setLastScanTime(null);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
   };
 
   const handleUploadAndAnalyze = async () => {
@@ -63,10 +88,16 @@ export default function ShelfPlanogramAuditor() {
       }
 
       const data = await res.json();
+      const now = new Date().toLocaleString();
       setAuditResult(data);
+      setLastScanTime(now);
+      // Persist to localStorage so it survives page refresh
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ result: data, timestamp: now }));
+      } catch (e) {}
     } catch (err) {
       console.error(err);
-      setErrorMsg("Failed to run AI Shelf Audit. Ensure backend is running.");
+      setErrorMsg("Failed to run AI Shelf Audit. Ensure backend is running and try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -85,10 +116,23 @@ export default function ShelfPlanogramAuditor() {
             Upload shelf photos to automatically identify product facings, detect Out-of-Stock void gaps, calculate Golden Zone share, and receive smart repositioning directives.
           </p>
         </div>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          {lastScanTime && (
+            <span style={{ fontSize: "11px", padding: "6px 12px", borderRadius: "20px", background: "rgba(91,141,239,0.15)", color: TOKENS.info, fontWeight: 700, border: "1px solid rgba(91,141,239,0.3)" }}>
+              🕐 Last scan: {lastScanTime}
+            </span>
+          )}
           <span style={{ fontSize: "11px", padding: "6px 12px", borderRadius: "20px", background: "rgba(95,174,134,0.15)", color: TOKENS.success, fontWeight: 700, border: "1px solid rgba(95,174,134,0.3)" }}>
             ⚡ YOLOv8 + Spatial Planogram AI
           </span>
+          {auditResult && (
+            <button
+              onClick={handleClearResult}
+              style={{ fontSize: "11px", padding: "6px 12px", borderRadius: "20px", background: "rgba(232,101,79,0.12)", color: TOKENS.danger, fontWeight: 700, border: "1px solid rgba(232,101,79,0.3)", cursor: "pointer" }}
+            >
+              🗑️ Clear Results
+            </button>
+          )}
         </div>
       </div>
 
