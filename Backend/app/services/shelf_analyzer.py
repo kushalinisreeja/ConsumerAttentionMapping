@@ -362,16 +362,125 @@ def analyze_shelf_image(image_bytes: bytes, filename: str = "shelf.jpg") -> Dict
 
     # Golden Zone & Planogram Score
     golden_count = len(rows_items["Eye-Level (Golden Zone)"])
+    # Golden Zone & Planogram Score
+    golden_count = len(rows_items["Eye-Level (Golden Zone)"])
     golden_share = round((golden_count / max(total_facings, 1)) * 100, 1)
     
     # Planogram scoring formula penalizes OOS gaps and rewards Golden Zone completeness
     planogram_score = round(max(35.0, min(99.0, 100.0 - (len(oos_gaps) * 12.0) + (golden_share * 0.15))), 1)
 
+    # 5. Smart Merchandising & Shelf Placement Directives
+    smart_recs = []
+
+    # A. OOS Restock Priority Directive
+    if oos_gaps:
+        tot_missing = sum(g.get("est_missing_units", 1) for g in oos_gaps)
+        crit_gap = next((g for g in oos_gaps if "Golden" in g["shelf_tier"]), oos_gaps[0])
+        smart_recs.append({
+            "id": "REC-RESTOCK-01",
+            "type": "RESTOCK",
+            "badge": "RESTOCK VOID GAP",
+            "badge_color": "#E8654F",
+            "icon": "⚠️",
+            "title": f"Replenish {tot_missing} Missing Units in {crit_gap['shelf_tier']}",
+            "action": f"Deploy immediate restock: fill void between items on {crit_gap['location']}.",
+            "source_tier": "Stockroom / Back inventory",
+            "target_tier": crit_gap["shelf_tier"],
+            "expected_impact": "Recovers ~15% to 22% immediate sales loss from customer walkaways.",
+            "priority": "CRITICAL" if "Golden" in crit_gap["shelf_tier"] else "HIGH",
+            "rationale": f"Identified {len(oos_gaps)} physical void gap(s). Gaps on eye-level tiers create visual clutter and immediately cause shopper drop-off."
+        })
+    else:
+        smart_recs.append({
+            "id": "REC-RESTOCK-OK",
+            "type": "RESTOCK",
+            "badge": "100% IN-STOCK",
+            "badge_color": "#5FAE86",
+            "icon": "✅",
+            "title": "Shelf Fully Stocked — Maintain Buffer Depth",
+            "action": "Ensure back-row units are pulled front-facing (block & face discipline).",
+            "source_tier": "Primary Facing",
+            "target_tier": "Shelf Front Edge",
+            "expected_impact": "Maintains 98%+ visual availability and optimal brand presentation.",
+            "priority": "LOW",
+            "rationale": "Zero void gaps detected across all horizontal tiers. Routine replenishment check passed."
+        })
+
+    # B. Shelf Changing / Repositioning Directive (Bottom -> Eye-Level)
+    bottom_items = rows_items.get("Bottom Shelf", [])
+    if bottom_items:
+        hero_item = bottom_items[0]
+        smart_recs.append({
+            "id": "REC-MOVE-01",
+            "type": "REPOSITION",
+            "badge": "RELOCATE TO EYE-LEVEL",
+            "badge_color": "#E8A33D",
+            "icon": "🔄",
+            "title": f"Elevate '{hero_item['name']}' from Bottom Shelf to Golden Zone",
+            "action": f"Move {hero_item['item_id']} up from Bottom Shelf into Eye-Level center.",
+            "source_tier": "Bottom Shelf (12% Viewer Dwell)",
+            "target_tier": "Eye-Level Golden Zone (64% Viewer Dwell)",
+            "expected_impact": "+42% shopper fixation lift, projected +26% units velocity lift.",
+            "priority": "HIGH",
+            "rationale": f"'{hero_item['name']}' is currently placed in the lowest visual tier where over 80% of browsing shoppers fail to notice it. Relocating it to 120cm–160cm eye-level dramatically boosts impulse discovery."
+        })
+
+    # C. Top Shelf Category Rationalization
+    top_items = rows_items.get("Top Shelf (Reach)", [])
+    if top_items:
+        smart_recs.append({
+            "id": "REC-MOVE-02",
+            "type": "OPTIMIZATION",
+            "badge": "VERTICAL TIER BALANCING",
+            "badge_color": "#5B8DEF",
+            "icon": "📦",
+            "title": "Reserve Top Shelf for Large Destination Packs & Bulk Items",
+            "action": "Shift high-velocity single-serve units down to Mid/Eye tiers; keep family packs on Top Shelf.",
+            "source_tier": "Top Shelf (Reach Tier)",
+            "target_tier": "Destination / Bulk Anchor Zone",
+            "expected_impact": "Eliminates customer reaching friction and reduces product drop accidents by 30%.",
+            "priority": "MEDIUM",
+            "rationale": "Top shelves require vertical reach and are best suited for planned, intentional destination purchases rather than fast-grab impulse items."
+        })
+
+    # D. Category Share & Facing Expansion Directive
+    if share_of_shelf:
+        dominant_cat = share_of_shelf[0]
+        if dominant_cat["share_pct"] >= 50:
+            smart_recs.append({
+                "id": "REC-FACING-01",
+                "type": "FACING_BALANCE",
+                "badge": "FACING DIVERSIFICATION",
+                "badge_color": "#A78BFA",
+                "icon": "⚖️",
+                "title": f"Trim '{dominant_cat['category']}' Facings to Cross-Merchandise Complementary SKUs",
+                "action": f"Reallocate 1-2 facings of {dominant_cat['category']} ({dominant_cat['share_pct']}% share) to high-margin impulse pairings.",
+                "source_tier": f"{dominant_cat['category']} Over-index",
+                "target_tier": "Adjacent Cross-Category Duo",
+                "expected_impact": "+18% cross-sell conversion rate and higher average basket value.",
+                "priority": "MEDIUM",
+                "rationale": f"Allocating over 50% of shelf space to a single category produces diminishing returns. Pairing with high-dwell complementary goods unlocks higher revenue per shelf foot."
+            })
+        else:
+            smart_recs.append({
+                "id": "REC-FACING-02",
+                "type": "EXPANSION",
+                "badge": "HERO SKU EXPANSION",
+                "badge_color": "#5FAE86",
+                "icon": "⭐",
+                "title": f"Expand Golden Zone Facings for '{dominant_cat['category']}'",
+                "action": f"Grant '{dominant_cat['category']}' double-facing frontage in the central Eye-Level zone.",
+                "source_tier": "Single Facing Width",
+                "target_tier": "Double-Facing Frontage",
+                "expected_impact": "+20% instant visual recognition across pedestrian corridor flow.",
+                "priority": "HIGH",
+                "rationale": f"As your leading category ({dominant_cat['share_pct']}% share), double-facing ensures the brand billboard effect remains unbroken even during peak shopping hours."
+            })
+
     import gc
     gc.collect()
 
     return {
-
         "filename": filename,
         "total_facings_detected": total_facings,
         "out_of_stock_gaps_count": len(oos_gaps),
@@ -382,6 +491,7 @@ def analyze_shelf_image(image_bytes: bytes, filename: str = "shelf.jpg") -> Dict
         "share_of_shelf": share_of_shelf,
         "detected_items": detected_items,
         "out_of_stock_gaps": oos_gaps,
+        "smart_placement_recommendations": smart_recs,
         "annotated_image_base64": annotated_base64,
         "ai_merchandising_recommendations": [
             f"Restock Priority: {len(oos_gaps)} Out-of-Stock void gaps localized across shelf rows." if oos_gaps else "Optimal stock level: Zero void gaps detected on this shelf.",
@@ -389,3 +499,4 @@ def analyze_shelf_image(image_bytes: bytes, filename: str = "shelf.jpg") -> Dict
             f"Primary category '{share_of_shelf[0]['category'] if share_of_shelf else 'Packaged Goods'}' occupies {share_of_shelf[0]['share_pct'] if share_of_shelf else 0}% of visible shelf space."
         ]
     }
+

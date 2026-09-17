@@ -36,7 +36,7 @@ const PATHWAYS = [
     id: "PATH-01",
     rank: 1,
     name: "The Quick Grocery & Essentials Loop",
-    badge: "?? #1 Dominant Route",
+    badge: "🥇 #1 Dominant Route",
     sequence: ["Entrance", "Grocery & Snacks", "Checkout", "Exit"],
     shopper_count: 622,
     share_pct: 42.0,
@@ -50,7 +50,7 @@ const PATHWAYS = [
     id: "PATH-02",
     rank: 2,
     name: "High-Value Tech & Snack Explorer",
-    badge: "?? #2 High-Basket Route",
+    badge: "🥈 #2 High-Basket Route",
     sequence: ["Entrance", "Electronics", "Grocery & Snacks", "Checkout", "Exit"],
     shopper_count: 414,
     share_pct: 28.0,
@@ -64,10 +64,11 @@ const PATHWAYS = [
     id: "PATH-03",
     rank: 3,
     name: "The Full Department Grand Tour",
-    badge: "?? #3 Longest Dwell Route",
+    badge: "🥉 #3 Longest Dwell Route",
     sequence: ["Entrance", "Grocery & Snacks", "Apparel", "Electronics", "Checkout", "Exit"],
     shopper_count: 266,
     share_pct: 18.0,
+
     avg_duration_min: 24.8,
     conversion_rate: 88.0,
     traffic_level: "Steady Traffic",
@@ -107,8 +108,8 @@ export default function CommonPathwaysStudio() {
       {/* HEADER BANNER */}
       <div style={{ ...cardStyle, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>
-            ??? Common Customer Pathways & Navigation Flow
+          <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700, display: "flex", alignItems: "center", gap: "10px", color: TOKENS.text }}>
+            🗺️ Common Customer Pathways & Navigation Flow
           </h2>
           <p style={{ margin: "4px 0 0", fontSize: "12px", color: TOKENS.muted }}>
             Aggregated traffic routing analysis. Understand dominant shopping corridors and eliminate store dead zones.
@@ -116,12 +117,13 @@ export default function CommonPathwaysStudio() {
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           <span style={{ fontSize: "11px", padding: "6px 12px", borderRadius: "20px", background: "rgba(95,174,134,0.15)", color: TOKENS.success, fontWeight: 700 }}>
-            ? 1,480 Journeys Analyzed
+            ✅ 1,480 Journeys Analyzed
           </span>
           <span style={{ fontSize: "11px", padding: "6px 12px", borderRadius: "20px", background: "rgba(232,163,61,0.15)", color: TOKENS.accent, fontWeight: 700 }}>
             Top Route: 42% Share
           </span>
         </div>
+
       </div>
 
       {/* TWO-COLUMN SPACIOUS LAYOUT */}
@@ -181,7 +183,7 @@ export default function CommonPathwaysStudio() {
                         {step}
                       </span>
                       {idx < p.sequence.length - 1 && (
-                        <span style={{ color: p.color, fontSize: "11px", fontWeight: 700 }}>?</span>
+                        <span style={{ color: p.color, fontSize: "11px", fontWeight: 700 }}>➔</span>
                       )}
                     </React.Fragment>
                   ))}
@@ -189,9 +191,9 @@ export default function CommonPathwaysStudio() {
 
                 {/* METRICS PILL ROW */}
                 <div style={{ display: "flex", gap: "14px", fontSize: "11px", color: TOKENS.muted, paddingTop: "8px", borderTop: `1px solid ${TOKENS.cardBorder}` }}>
-                  <span>?? <strong style={{ color: TOKENS.text }}>{p.shopper_count}</strong> shoppers</span>
-                  <span>? <strong style={{ color: TOKENS.text }}>{p.avg_duration_min} min</strong> avg dwell</span>
-                  <span>?? <strong style={{ color: TOKENS.success }}>{p.conversion_rate}%</strong> conversion</span>
+                  <span>👥 <strong style={{ color: TOKENS.text }}>{p.shopper_count}</strong> shoppers</span>
+                  <span>⏱️ <strong style={{ color: TOKENS.text }}>{p.avg_duration_min} min</strong> avg dwell</span>
+                  <span>🛍️ <strong style={{ color: TOKENS.success }}>{p.conversion_rate}%</strong> conversion</span>
                 </div>
               </div>
             );
@@ -204,13 +206,14 @@ export default function CommonPathwaysStudio() {
           {/* 2D STORE BLUEPRINT CANVAS */}
           <div style={cardStyle}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-              <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700 }}>
-                ??? Store Blueprint Flow Visualizer
+              <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: TOKENS.text }}>
+                📐 Store Blueprint Flow Visualizer
               </h3>
               <span style={{ fontSize: "11px", color: selectedPath.color, fontWeight: 700 }}>
                 Viewing: {selectedPath.name}
               </span>
             </div>
+
 
             {/* SVG STORE MAP */}
             <div style={{ width: "100%", background: TOKENS.bg, borderRadius: "10px", padding: "10px", border: `1px solid ${TOKENS.cardBorder}` }}>
