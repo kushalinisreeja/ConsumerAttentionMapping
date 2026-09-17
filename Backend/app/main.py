@@ -16,12 +16,13 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
+        "https://consumer-attention-mapping.vercel.app",  # <-- Your Vercel domain
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",        # <-- Allows ANY Vercel preview or production link!
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # Application Routers
 app.include_router(auth.router, tags=["Auth"])
 app.include_router(stores.router, tags=["Stores"])
